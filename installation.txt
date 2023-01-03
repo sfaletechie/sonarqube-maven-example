@@ -77,3 +77,24 @@ mvn sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=077112d4e78
 
 
 -------------------------------------------------
+
+Nexus: 8081
+apt update
+
+apt install openjdk-8-jdk
+
+wget https://sonatype-download.global.ssl.fastly.net/repository/downloads-prod-group/3/nexus-3.29.2-02-unix.tar.gz
+
+mkdir /opt/nexus
+
+tar xzf nexus-3.29.2-02-unix.tar.gz -C /opt/nexus --strip-components=1
+
+vi /opt/nexus/bin/nexus.rc
+ run_as_user="root"
+ 
+vi /opt/nexus/bin/nexus.vmoptions
+ change ../sonatype-work to ./sonatype-work
+
+sudo /opt/nexus/bin/nexus start
+
+cat /opt/nexus/sonatype-work/nexus3/admin.password
