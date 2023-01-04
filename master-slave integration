@@ -1,0 +1,37 @@
+Master side:
+vi /etc/sudoers
+vi /etc/ssh/sshd_config
+systemctl restart sshd
+cd /home/
+mkdir jenkins
+ssh-keygen -t rsa
+ssh-copy-id jenkins@65.0.101.79
+   65  ssh jenkins@65.0.101.79
+   66  touch /var/lib/jenkins/.ssh/known_hosts
+   67  mkdir /var/lib/jenkins/.ssh
+   68  touch /var/lib/jenkins/.ssh/known_hosts
+   69  ssh-copy-id jenkins@65.0.101.79
+   70  ssh jenkins@65.0.101.79
+   71  cp /root/.ssh/known_hosts /var/lib/jenkins/.ssh/
+
+Agent side:
+apt update   
+apt install git maven -y   
+apt install openjdk-11-jre-headless   
+hostname jenkinsagent
+ssh-keygen -t rsa
+useradd jenkins
+passwd jenkins
+vi /etc/sudoers
+vi /etc/ssh/sshd_config
+systemctl restart sshd
+mkdir /home/jenkins
+mkdir /home/jenkins/.ssh
+su jenkins
+ssh-keygen
+
+sudo su
+
+chown jenkins jenkins/
+chmod 777 jenkins/.ssh/
+chmod 777 jenkins/
