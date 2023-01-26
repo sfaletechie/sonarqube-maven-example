@@ -1,0 +1,58 @@
+pipeline{
+    agent any
+    tools {
+        maven 'Maven' 
+    }
+    stages{
+        stage("TEST"){
+            steps{
+                sh 'mvn test'
+                slackSend channel: 'devops-notifications', message: 'this is TEST stage $BUILD_ID'
+            }
+        }
+        stage("Build"){
+            steps{
+                slackSend channel: 'devops-notifications', message: 'this is BUILD stage'
+                sh 'mvn package'
+            }
+        }
+        stage("Publish to Nexus Repository Manager") {
+            steps {
+                nexusArtifactUploader artifacts: [[artifactId: 'hello-world', classifier: '', file: 'target/hello-world-0.0.1-SNAPSHOT.war', type: 'war']], credentialsId: 'admin_nexus', groupId: 'com.springhow.example', nexusUrl: '192.168.29.42:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'sample-s', version: '0.0.1-SNAPSHOT'
+            }
+        }
+        stage("Maven sonar") {
+            steps {
+                script {
+                    sh "mvn sonar:sonar -Dsonar.host.url=http://192.168.29.51:9000 -Dsonar.login=2338e801d107f6eb04eadb7fca678c6640168dd6"
+                }
+            }
+        }
+        stage("deployOnTest"){
+            steps{
+                slackSend channel: 'devops-notifications', message: 'this is deployOnTest stage'
+                deploy adapters: [tomcat7(credentialsId: 'tomcat8details', path: '', url: 'http://192.168.29.109:8080/')], contextPath: '/app1', onFailure: false, war: '**/*.war'
+            }
+        }
+        stage("deployOnPROD"){
+             input {
+                message 'continueToPROD'
+            }
+            steps{
+                slackSend channel: 'devops-notifications', message: 'this is deployOnPROD stage'
+                deploy adapters: [tomcat7(credentialsId: 'tomcat8details', path: '', url: 'http://192.168.29.42:8080')], contextPath: '/app1', onFailure: false, war: '**/*.war'
+            }
+        }
+    }
+    post{
+        always{
+            echo "========always========"
+        }
+        success{
+            echo "========pipeline executed successfully ========"
+        }
+        failure{
+            echo "========pipeline execution failed========"
+        }
+    }
+}
