@@ -21,11 +21,18 @@ pipeline{
                 nexusArtifactUploader artifacts: [[artifactId: 'hello-world', classifier: '', file: 'target/hello-world-0.0.1-SNAPSHOT.war', type: 'war']], credentialsId: 'admin_nexus', groupId: 'com.springhow.example', nexusUrl: '192.168.29.42:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'sample-s', version: '0.0.1-SNAPSHOT'
             }
         }
-        stage("Maven sonar") {
+        stage("Sonar Gate") {
             steps {
                 script {
                     sh "mvn sonar:sonar -Dsonar.host.url=http://192.168.29.51:9000 -Dsonar.login=2338e801d107f6eb04eadb7fca678c6640168dd6"
                 }
+            }
+        }
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
+                  }
             }
         }
         stage("deployOnTest"){
